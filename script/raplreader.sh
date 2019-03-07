@@ -23,6 +23,14 @@ CORE_WATTS=`bc -l <<< $CORE_JOULES/$TIME_SECONDS`
 echo "- - - - - - R A P L r e a d e r - - - - - -"
 printf "Time taken (s): %8.4f\n" "$TIME_SECONDS"
 
+if [ $PKG_DELTA -lt 0 ]; then
+ echo "WARNING: Negative value for package delta" 
+fi
+
+if [ $CORE_DELTA -lt 0 ]; then
+ echo "WARNING: Negative value for core delta" 
+fi
+
 printf "Package energy consumption (j): %8.4f\n" "$PKG_JOULES"
 printf "Core energy consumption (j): %8.4f\n" "$CORE_JOULES"
 
