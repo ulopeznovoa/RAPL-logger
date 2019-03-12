@@ -10,14 +10,14 @@ touch /tmp/$PKG_LOG
 echo 'LOGFILES: '$CORE_LOG,$PKG_LOG
 
 #Launch app and get first RAPL read 
-echo $1 $2 $3 $4 $5 $6 $7 
+echo "${@}"
 
 CORE_READ=`cat /sys/class/powercap/intel-rapl/intel-rapl\:0/intel-rapl\:0\:0/energy_uj`
 echo $CORE_READ >> /tmp/$CORE_LOG
 PKG_READ=`cat /sys/class/powercap/intel-rapl/intel-rapl\:0/energy_uj`
 echo $PKG_READ >> /tmp/$PKG_LOG
 
-eval $1 $2 $3 $4 $5 $6 $7 & 
+eval "${@}" &
 PROC_ID=$!
 
 #Collect RAPL measures while app is running
@@ -49,11 +49,13 @@ LAST_READ=`tail /tmp/$CORE_LOG -n 1`
 
 TOTAL_POWER=0
 if [ "$OVERFLOWS" -gt 0 ]; then
-    TOTAL_POWER=$(((MAX_CORE_READ-FIRST_READ)+(MAX_CORE_READ*OVERFLOWS)+(LAST_READ)))
+    TOTAL_POWER=$(((MAX_CORE_READ-FIRST_READ)+(MAX_CORE_READ*(OVERFLOWS-1))+(LAST_READ)))
 else
     TOTAL_POWER=$((LAST_READ-FIRST_READ))
 fi
-echo 'Energy consumption of Core (j): '$TOTAL_POWER
+
+CORE_JOULES=`bc -l <<< $TOTAL_POWER/1000000`
+printf "Core energy consumption (j): %8.4f\n" "$CORE_JOULES"
 
 #Compute energy consumption for Package
 PREVIOUS=`head /tmp/$PKG_LOG -n 1`
@@ -73,12 +75,12 @@ LAST_READ=`tail /tmp/$PKG_LOG -n 1`
 
 TOTAL_POWER=0
 if [ "$OVERFLOWS" -gt 0 ]; then
-    TOTAL_POWER=$(((MAX_CORE_READ-FIRST_READ)+(MAX_CORE_READ*OVERFLOWS)+(LAST_READ)))
+    TOTAL_POWER=$(((MAX_CORE_READ-FIRST_READ)+(MAX_CORE_READ*(OVERFLOWS-1))+(LAST_READ)))
 else
     TOTAL_POWER=$((LAST_READ-FIRST_READ))
 fi
-echo 'Energy consumption of Package (j): '$TOTAL_POWER
 
-
+PKG_JOULES=`bc -l <<< $TOTAL_POWER/1000000`
+printf "Package energy consumption (j): %8.4f\n" "$PKG_JOULES"
 
 
