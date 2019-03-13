@@ -31,8 +31,8 @@ function compute_energy_consumption()
 }
 
 # CONFIGURE HERE RAPL-LOGGER
-FREQ=0.05 #Seconds between each sample of RAPL registers
-PACKAGES=1 #Number of sockets to be analysed. Currently 1 or 2 supported
+FREQ=0.1 #Seconds between each sample of RAPL registers
+PACKAGES=2 #Number of sockets to be analysed. Currently 1 or 2 supported
 REMOVE_LOGFILES=1 #1 = Yes, 0 = No; Remove logfiles after execution
 RAPL_TAG_0=intel-rapl\:0
 RAPL_TAG_1=intel-rapl\:0/intel-rapl\:0\:0
@@ -73,9 +73,9 @@ TAG1_READ=`cat /sys/class/powercap/intel-rapl/$RAPL_TAG_1/energy_uj`
 echo $TAG1_READ >> /tmp/$TAG1_LOG
 
 if [ "$PACKAGES" -eq 2 ]; then
-    TAG0_READ=`cat /sys/class/powercap/intel-rapl/$RAPL_TAG_2/energy_uj`
+    TAG2_READ=`cat /sys/class/powercap/intel-rapl/$RAPL_TAG_2/energy_uj`
     echo $TAG2_READ >> /tmp/$TAG2_LOG
-    TAG1_READ=`cat /sys/class/powercap/intel-rapl/$RAPL_TAG_3/energy_uj`
+    TAG3_READ=`cat /sys/class/powercap/intel-rapl/$RAPL_TAG_3/energy_uj`
     echo $TAG3_READ >> /tmp/$TAG3_LOG
 fi
 
@@ -105,7 +105,7 @@ while kill -0 "$PROC_ID" >/dev/null 2>&1; do
 
     TAG2_READ=`cat /sys/class/powercap/intel-rapl/$RAPL_TAG_2/energy_uj`
     echo $TAG2_READ >> /tmp/$TAG2_LOG
-    TAG1_READ=`cat /sys/class/powercap/intel-rapl/$RAPL_TAG_3/energy_uj`
+    TAG3_READ=`cat /sys/class/powercap/intel-rapl/$RAPL_TAG_3/energy_uj`
     echo $TAG3_READ >> /tmp/$TAG3_LOG
 
     sleep $FREQ
