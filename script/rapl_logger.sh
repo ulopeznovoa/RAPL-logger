@@ -38,6 +38,12 @@ RAPL_TAG_1=intel-rapl\:0/intel-rapl\:0\:0
 RAPL_TAG_2=intel-rapl\:1
 RAPL_TAG_3=intel-rapl\:1/intel-rapl\:1\:0
 
+#Check arguments
+if [ "$#" -lt 1 ]; then
+    echo "** RAPL-logger Error: You must provide the name of the app to profile"
+    exit
+fi
+
 #Prepare logfiles
 TIMESTAMP=`date +%s`
 TAG0_LOG=rapllog+$TIMESTAMP+0
