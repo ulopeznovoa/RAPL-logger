@@ -31,8 +31,9 @@ function compute_energy_consumption()
 }
 
 # CONFIGURE HERE RAPL-LOGGER
-FREQ=0.1 #Seconds between each sample of RAPL registers
+FREQ=0.05 #Seconds between each sample of RAPL registers
 PACKAGES=1 #Number of sockets to be analysed. Currently 1 or 2 supported
+REMOVE_LOGFILES=1 #1 = Yes, 0 = No; Remove logfiles after execution
 RAPL_TAG_0=intel-rapl\:0
 RAPL_TAG_1=intel-rapl\:0/intel-rapl\:0\:0
 RAPL_TAG_2=intel-rapl\:1
@@ -51,14 +52,16 @@ TAG1_LOG=rapllog+$TIMESTAMP+1
 touch /tmp/$TAG0_LOG
 touch /tmp/$TAG1_LOG
 
+HZ=`bc -l <<< 1/$FREQ`
+
 if [ "$PACKAGES" -eq 2 ]; then
     TAG2_LOG=rapllog+$TIMESTAMP+2
     TAG3_LOG=rapllog+$TIMESTAMP+3
     touch /tmp/$TAG2_LOG
     touch /tmp/$TAG3_LOG
-    echo '** RAPL-logger - 2 packages - Logfiles 0-3: /tmp/rapllog+'$TIMESTAMP
+    printf '** RAPL-logger - 2 packages - Sampling freq.  %4.1f Hz - Logfiles 0-3: /tmp/rapllog+%s\n' $HZ $TIMESTAMP
 else
-    echo '** RAPL-logger - 1 package - Logfiles 0-1: /tmp/rapllog+'$TIMESTAMP
+    printf '** RAPL-logger - 1 package - Sampling freq.  %4.1f Hz - Logfiles 0-1: /tmp/rapllog+%s\n' $HZ $TIMESTAMP
 fi
 
 #Launch app and get first RAPL read 
@@ -147,3 +150,12 @@ if [ "$PACKAGES" -eq 2 ]; then #Print additional value for 2nd package
 
 fi
 
+#Remove logfiles if necessary
+if [ "$REMOVE_LOGFILES" -eq 1 ]; then
+    rm /tmp/$TAG0_LOG
+    rm /tmp/$TAG1_LOG
+    if [ "$PACKAGES" -eq 2 ]; then
+        rm /tmp/$TAG2_LOG
+        rm /tmp/$TAG3_LOG
+    fi
+fi
