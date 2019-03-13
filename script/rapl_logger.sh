@@ -62,7 +62,7 @@ else
 fi
 
 #Launch app and get first RAPL read 
-echo "${@}"
+echo "** RAPL-logger - Profiling: ${@}"
 
 TAG0_READ=`cat /sys/class/powercap/intel-rapl/$RAPL_TAG_0/energy_uj`
 echo $TAG0_READ >> /tmp/$TAG0_LOG
@@ -117,28 +117,33 @@ echo "** RAPL-logger - Process terminated, computing results"
 
 TIME_DELTA=$((TIME_END-TIME_START))
 TIME_SECONDS=`bc -l <<< $TIME_DELTA/1000`
+printf "Recorded wall time (s): %8.4f\n" "$TIME_SECONDS"
 
 TAG0_JOULES=$(compute_energy_consumption $TAG0_LOG $RAPL_TAG_0)
 TAG0_WATTS=`bc -l <<< $TAG0_JOULES/$TIME_SECONDS`
-printf "TAG0 energy consumption (j): %8.4f\n" "$TAG0_JOULES"
-printf "TAG0 avg. power consumption (W): %8.4f\n" "$TAG0_WATTS"
+TAG0_NAME=`cat /sys/class/powercap/intel-rapl/$RAPL_TAG_0/name`
+printf "Domain $RAPL_TAG_0 ($TAG0_NAME) energy consumption (j): %8.4f\n" "$TAG0_JOULES"
+printf "Domain $RAPL_TAG_0 ($TAG0_NAME) avg. power consumption (W): %8.4f\n" "$TAG0_WATTS"
 
 TAG1_JOULES=$(compute_energy_consumption $TAG1_LOG $RAPL_TAG_1)
 TAG1_WATTS=`bc -l <<< $TAG1_JOULES/$TIME_SECONDS`
-printf "TAG1 energy consumption (j): %8.4f\n" "$TAG1_JOULES"
-printf "TAG1 avg. power consumption (W): %8.4f\n" "$TAG1_WATTS"
+TAG1_NAME=`cat /sys/class/powercap/intel-rapl/$RAPL_TAG_1/name`
+printf "Domain $RAPL_TAG_1 ($TAG1_NAME) energy consumption (j): %8.4f\n" "$TAG1_JOULES"
+printf "Domain $RAPL_TAG_1 ($TAG1_NAME) avg. power consumption (W): %8.4f\n" "$TAG1_WATTS"
 
 if [ "$PACKAGES" -eq 2 ]; then #Print additional value for 2nd package
 
     TAG2_JOULES=$(compute_energy_consumption $TAG2_LOG $RAPL_TAG_2)
     TAG2_WATTS=`bc -l <<< $TAG2_JOULES/$TIME_SECONDS`
-    printf "TAG2 energy consumption (j): %8.4f\n" "$TAG2_JOULES"
-    printf "TAG2 avg. power consumption (W): %8.4f\n" "$TAG2_WATTS"
+    TAG2_NAME=`cat /sys/class/powercap/intel-rapl/$RAPL_TAG_2/name`
+    printf "Domain $RAPL_TAG_2 ($TAG2_NAME) energy consumption (j): %8.4f\n" "$TAG2_JOULES"
+    printf "Domain $RAPL_TAG_2 ($TAG2_NAME) avg. power consumption (W): %8.4f\n" "$TAG2_WATTS"
 
     TAG3_JOULES=$(compute_energy_consumption $TAG3_LOG $RAPL_TAG_3)
     TAG3_WATTS=`bc -l <<< $TAG3_JOULES/$TIME_SECONDS`
-    printf "TAG3 energy consumption (j): %8.4f\n" "$TAG3_JOULES"
-    printf "TAG3 avg. power consumption (W): %8.4f\n" "$TAG3_WATTS"
+    TAG3_NAME=`cat /sys/class/powercap/intel-rapl/$RAPL_TAG_3/name`
+    printf "Domain $RAPL_TAG_3 ($TAG3_NAME) energy consumption (j): %8.4f\n" "$TAG3_JOULES"
+    printf "Domain $RAPL_TAG_3 ($TAG3_NAME) avg. power consumption (W): %8.4f\n" "$TAG3_WATTS"
 
 fi
 
