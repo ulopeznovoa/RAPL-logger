@@ -1,5 +1,13 @@
 #!/bin/bash
 
+# RAPL-logger
+# A tool to monitor the energy consumption of an application w/o root privileges
+# It reads the RAPL registers located in the /sys/class folder at the frequency specified in line 41
+# Usage: ./rapl_logger <your-app> <params-of-your-app>
+# Author: Unai Lopez-Novoa, 2019
+# License: MIT
+
+
 # This function will calculate the Joules for each RAPL tag
 # Arguments: Logfile path, RAPL TAG
 function compute_energy_consumption()
@@ -32,8 +40,8 @@ function compute_energy_consumption()
 
 # CONFIGURE HERE RAPL-LOGGER
 FREQ=0.1 #Seconds between each sample of RAPL registers
-PACKAGES=2 #Number of sockets to be analysed. Currently 1 or 2 supported
-REMOVE_LOGFILES=1 #1 = Yes, 0 = No; Remove logfiles after execution
+PACKAGES=1 #Number of sockets to be analysed. Currently 1 or 2 supported
+REMOVE_LOGFILES=0 #1 = Yes, 0 = No; Remove logfiles after execution
 RAPL_TAG_0=intel-rapl\:0
 RAPL_TAG_1=intel-rapl\:0/intel-rapl\:0\:0
 RAPL_TAG_2=intel-rapl\:1
