@@ -1,8 +1,8 @@
 # RAPL logger
 
-A tool to monitor the energy consumption of an application running in an Intel-based system. It reads the RAPL information available in the */sys/class/powercap*.
+A tool to monitor the energy consumption of an application running in an Intel-based system. It reads the RAPL information available in the */sys/class/powercap*. Unlike other ways of reading RAPL registers (like using *perf*), it doesn't require the user to have sudo privileges.
 
-Usage: ./rapl_logger \<your-app\> $\<params-of-your-app\>
+Usage: ./rapl_logger \<your-app\> \<params-of-your-app\>
 
 Edit the following lines of the script file to configure RAPL logger:
 - 42: FREQ=0.1 #Seconds between each sample of RAPL registers. 0.1 Seconds == 10 Hz
