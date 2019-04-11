@@ -7,6 +7,31 @@
 # Author: Unai Lopez-Novoa, 2019
 # License: MIT
 
+#This function logs the RAPL readings from /sys/fs while app runs
+function log_rapl_values()
+{
+  if [ "$PACKAGES" -eq 1 ]; then #Loop for 1 package, 2 readings
+
+  while [ "1" ]; do
+      cat /sys/class/powercap/intel-rapl/$RAPL_TAG_0/energy_uj >> /tmp/$TAG0_LOG
+      cat /sys/class/powercap/intel-rapl/$RAPL_TAG_1/energy_uj >> /tmp/$TAG1_LOG
+      sleep $FREQ
+  done
+
+  else #Loop for 2 packages, 4 readings
+
+  while [ "1" ]; do
+      cat /sys/class/powercap/intel-rapl/$RAPL_TAG_0/energy_uj >> /tmp/$TAG0_LOG
+      cat /sys/class/powercap/intel-rapl/$RAPL_TAG_1/energy_uj >> /tmp/$TAG1_LOG
+
+      cat /sys/class/powercap/intel-rapl/$RAPL_TAG_2/energy_uj >> /tmp/$TAG2_LOG
+      cat /sys/class/powercap/intel-rapl/$RAPL_TAG_3/energy_uj >> /tmp/$TAG3_LOG
+
+      sleep $FREQ
+  done
+
+  fi
+}
 
 # This function will calculate the Joules for each RAPL tag
 # Arguments: Logfile path, RAPL TAG
@@ -39,7 +64,7 @@ function compute_energy_consumption()
 }
 
 # CONFIGURE HERE RAPL-LOGGER
-FREQ=0.005 #Seconds between each sample of RAPL registers
+FREQ=0.1 #Seconds between each sample of RAPL registers
 PACKAGES=1 #Number of sockets to be analysed. Currently 1 or 2 supported
 REMOVE_LOGFILES=0 #1 = Yes, 0 = No; Remove logfiles after execution
 RAPL_TAG_0=intel-rapl\:0
@@ -72,7 +97,7 @@ else
     printf '** RAPL-logger - 1 package - Sampling freq.  %4.1f Hz - Logfiles 0-1: /tmp/rapllog+%s\n' $HZ $TIMESTAMP
 fi
 
-#Launch app and get first RAPL read 
+#Initialise RAPL logs with first values, launch app and RAPL loggin routine
 echo "** RAPL-logger - Profiling: ${@}"
 
 cat /sys/class/powercap/intel-rapl/$RAPL_TAG_0/energy_uj >> /tmp/$TAG0_LOG
@@ -88,33 +113,19 @@ TIME_START=`date +%s%3N`
 eval "${@}" &
 PROC_ID=$!
 
-#Collect RAPL measures while app is running
-if [ "$PACKAGES" -eq 1 ]; then #Loop for 1 package, 2 readings
+log_rapl_values &
+disown
+LOGGER_PID=$!
 
-while kill -0 "$PROC_ID" >/dev/null 2>&1; do
-    cat /sys/class/powercap/intel-rapl/$RAPL_TAG_0/energy_uj >> /tmp/$TAG0_LOG
-    cat /sys/class/powercap/intel-rapl/$RAPL_TAG_1/energy_uj >> /tmp/$TAG1_LOG
-    sleep $FREQ
-done
 
-else #Loop for 2 packages, 4 readings
-
-while kill -0 "$PROC_ID" >/dev/null 2>&1; do
-    cat /sys/class/powercap/intel-rapl/$RAPL_TAG_0/energy_uj >> /tmp/$TAG0_LOG
-    cat /sys/class/powercap/intel-rapl/$RAPL_TAG_1/energy_uj >> /tmp/$TAG1_LOG
-
-    cat /sys/class/powercap/intel-rapl/$RAPL_TAG_2/energy_uj >> /tmp/$TAG2_LOG
-    cat /sys/class/powercap/intel-rapl/$RAPL_TAG_3/energy_uj >> /tmp/$TAG3_LOG
-
-    sleep $FREQ
-done
-
-fi
-
+##Wait for app to end and terminate function logging RAPL values
+wait $PROC_ID 
 TIME_END=`date +%s%3N`
-echo "** RAPL-logger - Process terminated, computing results"
+kill $LOGGER_PID
 
 #Compute energy and avg. power consumption from logs
+
+echo "** RAPL-logger - Process terminated, computing results"
 
 TIME_DELTA=$((TIME_END-TIME_START))
 TIME_SECONDS=`bc -l <<< $TIME_DELTA/1000`
