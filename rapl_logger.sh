@@ -39,7 +39,7 @@ function compute_energy_consumption()
 }
 
 # CONFIGURE HERE RAPL-LOGGER
-FREQ=0.1 #Seconds between each sample of RAPL registers
+FREQ=0.005 #Seconds between each sample of RAPL registers
 PACKAGES=1 #Number of sockets to be analysed. Currently 1 or 2 supported
 REMOVE_LOGFILES=0 #1 = Yes, 0 = No; Remove logfiles after execution
 RAPL_TAG_0=intel-rapl\:0
@@ -75,16 +75,12 @@ fi
 #Launch app and get first RAPL read 
 echo "** RAPL-logger - Profiling: ${@}"
 
-TAG0_READ=`cat /sys/class/powercap/intel-rapl/$RAPL_TAG_0/energy_uj`
-echo $TAG0_READ >> /tmp/$TAG0_LOG
-TAG1_READ=`cat /sys/class/powercap/intel-rapl/$RAPL_TAG_1/energy_uj`
-echo $TAG1_READ >> /tmp/$TAG1_LOG
+cat /sys/class/powercap/intel-rapl/$RAPL_TAG_0/energy_uj >> /tmp/$TAG0_LOG
+cat /sys/class/powercap/intel-rapl/$RAPL_TAG_1/energy_uj >> /tmp/$TAG1_LOG
 
 if [ "$PACKAGES" -eq 2 ]; then
-    TAG2_READ=`cat /sys/class/powercap/intel-rapl/$RAPL_TAG_2/energy_uj`
-    echo $TAG2_READ >> /tmp/$TAG2_LOG
-    TAG3_READ=`cat /sys/class/powercap/intel-rapl/$RAPL_TAG_3/energy_uj`
-    echo $TAG3_READ >> /tmp/$TAG3_LOG
+    cat /sys/class/powercap/intel-rapl/$RAPL_TAG_2/energy_uj >> /tmp/$TAG2_LOG
+    cat /sys/class/powercap/intel-rapl/$RAPL_TAG_3/energy_uj >> /tmp/$TAG3_LOG
 fi
 
 TIME_START=`date +%s%3N`
@@ -96,25 +92,19 @@ PROC_ID=$!
 if [ "$PACKAGES" -eq 1 ]; then #Loop for 1 package, 2 readings
 
 while kill -0 "$PROC_ID" >/dev/null 2>&1; do
-    TAG0_READ=`cat /sys/class/powercap/intel-rapl/$RAPL_TAG_0/energy_uj`
-    echo $TAG0_READ >> /tmp/$TAG0_LOG
-    TAG1_READ=`cat /sys/class/powercap/intel-rapl/$RAPL_TAG_1/energy_uj`
-    echo $TAG1_READ >> /tmp/$TAG1_LOG
+    cat /sys/class/powercap/intel-rapl/$RAPL_TAG_0/energy_uj >> /tmp/$TAG0_LOG
+    cat /sys/class/powercap/intel-rapl/$RAPL_TAG_1/energy_uj >> /tmp/$TAG1_LOG
     sleep $FREQ
 done
 
 else #Loop for 2 packages, 4 readings
 
 while kill -0 "$PROC_ID" >/dev/null 2>&1; do
-    TAG0_READ=`cat /sys/class/powercap/intel-rapl/$RAPL_TAG_0/energy_uj`
-    echo $TAG0_READ >> /tmp/$TAG0_LOG
-    TAG1_READ=`cat /sys/class/powercap/intel-rapl/$RAPL_TAG_1/energy_uj`
-    echo $TAG1_READ >> /tmp/$TAG1_LOG
+    cat /sys/class/powercap/intel-rapl/$RAPL_TAG_0/energy_uj >> /tmp/$TAG0_LOG
+    cat /sys/class/powercap/intel-rapl/$RAPL_TAG_1/energy_uj >> /tmp/$TAG1_LOG
 
-    TAG2_READ=`cat /sys/class/powercap/intel-rapl/$RAPL_TAG_2/energy_uj`
-    echo $TAG2_READ >> /tmp/$TAG2_LOG
-    TAG3_READ=`cat /sys/class/powercap/intel-rapl/$RAPL_TAG_3/energy_uj`
-    echo $TAG3_READ >> /tmp/$TAG3_LOG
+    cat /sys/class/powercap/intel-rapl/$RAPL_TAG_2/energy_uj >> /tmp/$TAG2_LOG
+    cat /sys/class/powercap/intel-rapl/$RAPL_TAG_3/energy_uj >> /tmp/$TAG3_LOG
 
     sleep $FREQ
 done
